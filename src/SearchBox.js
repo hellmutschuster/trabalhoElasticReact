@@ -1,27 +1,59 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
+const wordsToRemove = [
+  'a',
+  'o',
+  'um',
+  'uma',
+  'de',
+  'em',
+  'para',
+  'por',
+  'com',
+  'até',
+  'e',
+  'mas',
+  'ou',
+  'também',
+  'se',
+  'assim',
+  'como',
+  'porque'
+];
+
+const filterQuery = (query) => {
+  const queryWords = query.trim().split(/\s+/);
+  
+  const queryFiltered = queryWords.filter(word => !wordsToRemove.includes(word));
+  
+  return queryFiltered.join(' ');
+};
+
 const SearchBox = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
 
   const handleSearch = async (event) => {
     event.preventDefault();
-
+  
     try {
+      const queryFiltered = filterQuery(query);
+  
       const response = await axios.post('http://localhost:9200/diario_oficial/_search', {
         query: {
           match: {
-            texto_completo: query
+            texto_completo: queryFiltered
           }
         }
       });
-
+  
       setResults(response.data.hits.hits);
     } catch (error) {
       console.error('Erro ao realizar a busca', error);
     }
   };
+  
 
   return (
     <div>
